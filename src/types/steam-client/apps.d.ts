@@ -18,6 +18,36 @@ type Apps = {
   RegisterForGameActionUserRequest: (callback: (unk1: number, appId: string, action: string, requestedAction: string, appId_2: string) => void) => Unregisterer,
 }
 
+type SteamAppData = {
+	details: SteamAppDetails,
+	socialMediaData: any,
+	associationData: {
+		rgDevelopers: {
+			strName: string,
+			strURL: string
+		}[],
+		rgPublishers: {
+			strName: string,
+			strURL: string
+		}[]
+		rgFranchises: {
+			strName: string,
+			strURL: string
+		}[]
+	},
+	appDetailsSpotlight: null,
+	descriptionsData: {
+		strFullDescription: ReactNode,
+		strSnippet: ReactNode
+	},
+	screenshots: null,
+	customImageInfoRtime: number,
+	cRegistered: 0,
+	listeners: [],
+	hAppDetails: {},
+	bLoadingAchievments: boolean
+}
+
 type SteamAppDetails = {
   achievements: SteamAppAchievements,
   bCanMoveInstallFolder:boolean,

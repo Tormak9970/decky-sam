@@ -1,32 +1,12 @@
 import { PyInterop } from "./PyInterop";
 import { waitForCondition } from "../Utils";
+import { runInAction } from "mobx";
 /**
  * Wrapper class for the SteamClient interface.
  */
 export class SteamController {
   private hasLoggedIn = false;
   private hasLoggedOut = false;
-
-  /**
-   * Gets the SteamAppOverview of the app with a given appId.
-   * @param appId The id of the app to get.
-   * @returns A promise resolving to the SteamAppOverview of the app
-   */
-  async getAppOverview(appId: number) {
-    await this.waitForAppOverview(appId, (overview) => overview !== null);
-    return this._getAppOverview(appId);
-  }
-
-  private async waitForAppOverview(appId: number, condition: (overview:SteamAppOverview|null) => boolean): Promise<boolean> {
-    return await waitForCondition(3, 250, async () => {
-      const overview = await this._getAppOverview(appId);
-      return condition(overview);
-    });
-  }
-  
-  async _getAppOverview(appId: number) {
-    return appStore.GetAppOverviewByAppID(appId) as SteamAppOverview | null;
-  }
 
   /**
    * Gets the SteamAppDetails of the app with a given appId.
@@ -59,11 +39,37 @@ export class SteamController {
   }
 
   /**
+   * Sets the achievements for the provided app.
+   * @param appid The id of the app to set achievements for.
+   * @param achievements The achievements of the app.
+   * @returns A promise resolving to true if the achievements were set.
+   */
+  async setAchievements(appid: number, achievements: SteamAppAchievements): Promise<boolean> {
+    let appData = appDetailsStore.GetAppData(appid);
+
+		if (appData && !appData.bLoadingAchievments && appData.details.achievements.nTotal === 0) {
+			appData.bLoadingAchievments = true;
+
+			if (achievements) {
+				runInAction(() => {
+					appData.details.achievements = achievements;
+					console.log("achievementsCachedData", appData.details.achievements);
+					appDetailsCache.SetCachedDataForApp(appid, "achievements", 2, appData.details.achievements);
+				});
+			}
+
+			appData.bLoadingAchievments = false;
+		}
+
+    return true;
+  }
+
+  /**
    * Gets the achievements for a game.
    * @param appid The id of the app to get achievements for.
    * @returns A promise resolving to the list of achievements.
    */
-  async getAllAchievementsForApp(appid: number): Promise<SteamAchievement[]> {
+  async getAllAchievementsForApp(appid: number): Promise<SteamAppAchievements> {
     const achievements = await appDetailsStore.GetAchievements(appid);
     console.log("Details Store Achievements", achievements);
     return achievements;

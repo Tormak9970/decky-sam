@@ -1,20 +1,13 @@
 import { ServerAPI } from "decky-frontend-lib";
 import { PyInterop } from "./PyInterop";
 import { SteamController } from "./SteamController";
-import { PluginState } from "../../state/PluginState";
 
-export type ChangedAchievement = {
-  achievement: SteamAchievement,
-  isUnlocked: boolean,
-  wasUnlocked: boolean
-}
 /**
  * Main controller class for the plugin.
  */
 export class PluginController {
   // @ts-ignore
   private static server: ServerAPI;
-  private static state: PluginState;
 
   private static steamController: SteamController;
 
@@ -24,14 +17,10 @@ export class PluginController {
   /**
    * Sets the plugin's serverAPI.
    * @param server The serverAPI to use.
-   * @param state The plugin state.
    */
-  static setup(server: ServerAPI, state: PluginState): void {
+  static setup(server: ServerAPI): void {
     this.server = server;
-    this.state = state;
     this.steamController = new SteamController();
-  
-    // ? any other init stuff here
   }
 
   /**
@@ -57,30 +46,31 @@ export class PluginController {
   }
 
   /**
-   * Gets the overview for the provided app.
-   * @param appid The id of the app to get the overview of.
-   * @returns A promise resolving to the app's overview, or null if failed.
+   * Gets the details for the provided app.
+   * @param appid The id of the app to get the details of.
+   * @returns A promise resolving to the app's details, or null if failed.
    */
-  static async getAppOverview(appid: number): Promise<SteamAppOverview | null> {
-    return await PluginController.steamController.getAppOverview(appid);
+  static async getAppDetails(appid: number): Promise<SteamAppDetails | null> {
+    return await PluginController.steamController.getAppDetails(appid);
   }
 
   /**
    * Gets the achievements for the provided app.
    * @param appid The id of the app to get achievements for.
-   * @returns A promise resolving to the list of achievements.
+   * @returns A promise resolving to the app's achievements.
    */
-  static async getAchievementsForApp(appid: number): Promise<SteamAchievement[]> {
+  static async getAchievementsForApp(appid: number): Promise<SteamAppAchievements> {
     return await PluginController.steamController.getAllAchievementsForApp(appid);
   }
   
   /**
    * Saves the changes made to the achievements of a game
-   * @param achievementChanges An array of changes made to the achievements of a game.
+   * @param appid The id of the app to update the achievements of.
+   * @param achievementChanges The changed achievements.
    * @returns A promise resolving to a boolean indicating if the changes were saved successfully.
    */
-  static async commitAchievementChanges(achievementChanges: ChangedAchievement[]): Promise<boolean> {
-    return false;
+  static async commitAchievementChanges(appid: number, changedAchievements: SteamAppAchievements): Promise<boolean> {
+    return PluginController.steamController.setAchievements(appid, changedAchievements);
   }
 
   /**

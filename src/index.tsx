@@ -10,21 +10,19 @@ import { VFC } from "react";
 import { IoRibbonSharp } from "react-icons/io5";
 
 import { PyInterop } from "./lib/controllers/PyInterop";
-import { PluginContextProvider, PluginState, usePluginState } from "./state/PluginState";
+import { PluginContextProvider, PluginState } from "./state/PluginState";
 import { PluginController } from "./lib/controllers/PluginController";
 import { getLibContextMenu, libContextMenuPatch } from "./patches/GameOptionsPatch";
 
 declare global {
   var SteamClient: SteamClient;
-  var collectionStore: CollectionStore;
   var appStore: AppStore;
   var appDetailsStore: AppDetailsStore;
+  var appDetailsCache: AppDetailsCache;
   var loginStore: LoginStore;
 }
 
 const Content: VFC<{ serverAPI: ServerAPI }> = ({ }) => {
-  // const { currentGame, currentGameId, setCurrentGame } = usePluginState();
-
   return (
     <PanelSection title="Usage">
       <PanelSectionRow>
@@ -38,7 +36,7 @@ export default definePlugin((serverApi: ServerAPI) => {
   PyInterop.setServer(serverApi);
 
   const state = new PluginState();
-  PluginController.setup(serverApi, state);
+  PluginController.setup(serverApi);
 
   const loginHook = PluginController.initOnLogin();
 

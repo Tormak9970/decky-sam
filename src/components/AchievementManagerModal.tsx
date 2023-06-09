@@ -1,6 +1,12 @@
 import { ButtonItem, Focusable, ModalRoot, PanelSectionRow } from "decky-frontend-lib";
 import { useState, Fragment, useEffect } from "react";
-import { ChangedAchievement, PluginController } from "../lib/controllers/PluginController";
+import { PluginController } from "../lib/controllers/PluginController";
+import { AchievementList } from "./AchievementList";
+
+type ChangedAchievement = {
+  achievement: SteamAchievement,
+  isUnlocked: boolean
+}
 
 export function AllThemesModalRoot({ gameAppId, closeModal }: { gameAppId: number, closeModal: any }) {
   return (
@@ -17,25 +23,77 @@ export function AchievementManagerModal({
   gameAppId: number,
   closeModal: any
 }) {
-  let currentGame: any = null; //TODO get this from appController
+  let currentGame: any = null;
 
-  const [achievements, setAchievements] = useState<SteamAppAchievements[]>([]); //TODO fetch themes
+  const [achievements, setAchievements] = useState<ChangedAchievement[]>([]);
 
-  const changedAchievements: ChangedAchievement[] = [];
+  function toggleAchievement(achievementID: string, isUnlocked: boolean): void {
+    const updatedAchievements = [...achievements];
+    updatedAchievements.find(achievement => achievement.achievement.strID == achievementID)!.isUnlocked = isUnlocked;
+    setAchievements(updatedAchievements);
+  }
 
-  function commitChanges(): void {
+  async function commitChanges(): Promise<void> {
+    const vecHighlight: SteamAchievement[] = [];
+    const vecUnachieved: SteamAchievement[] = [];
 
+    for (const entry of achievements) {
+      if (entry.isUnlocked) {
+        vecHighlight.push(entry.achievement);
+      } else {
+        vecUnachieved.push(entry.achievement);
+      }
+    }
+    
+    const nAchieved = vecHighlight.length;
+    const nTotal = achievements.length;
+
+    const appAchievements: SteamAppAchievements = {
+      nAchieved: nAchieved,
+      nTotal: nTotal,
+      vecAchievedHidden: [],
+      vecHighlight: vecHighlight,
+      vecUnachieved: vecUnachieved
+    };
+
+    const success = await PluginController.commitAchievementChanges(gameAppId, appAchievements);
+
+    if (success) {
+      // TODO: log
+      // TODO: show toast
+    } else {
+      // TODO: log
+      // TODO: show toast
+    }
   }
 
   useEffect(() => {
-    PluginController.getAppOverview(gameAppId).then((appOverview) => {
-      currentGame = appOverview;
+    PluginController.getAppDetails(gameAppId).then((appDetails) => {
+      currentGame = appDetails;
     });
 
     PluginController.getAchievementsForApp(gameAppId).then((achievements) => {
-      console.log(achievements)
-    })
-  });
+      console.log("Achievements recieved:", achievements);
+      
+      const entries: ChangedAchievement[] = [];
+
+      for (const unlocked of [...achievements.vecHighlight, ...achievements.vecAchievedHidden]) {
+        entries.push({
+          achievement: unlocked,
+          isUnlocked: true
+        });
+      }
+
+      for (const unlocked of achievements.vecUnachieved) {
+        entries.push({
+          achievement: unlocked,
+          isUnlocked: false
+        });
+      }
+
+      setAchievements(entries.sort((a, b) => a.achievement.strName.localeCompare(b.achievement.strName)));
+    });
+  }, []);
 
   return (
     <>
@@ -46,7 +104,7 @@ export function AchievementManagerModal({
         `}
       </style>
       <Focusable style={{ display: "flex", flexDirection: "column" }}>
-        {/* TODO: list out achievement entries */}
+        <AchievementList achievements={achievements} onAchievementToggle={toggleAchievement} />
       </Focusable>
       <PanelSectionRow>
         <ButtonItem layout="below" bottomSeparator="standard" onClick={commitChanges} >

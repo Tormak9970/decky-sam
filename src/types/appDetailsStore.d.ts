@@ -1,5 +1,6 @@
 // Types for the global appDetailsStore
 
 type AppDetailsStore = {
-  GetAchievements(appid: number): Promise<SteamAchievement[]>
+  GetAppData(appid: number): SteamAppData,
+  GetAchievements(appid: number): Promise<SteamAppAchievements>
 }

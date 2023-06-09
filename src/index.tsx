@@ -1,105 +1,65 @@
 import {
-  ButtonItem,
   definePlugin,
-  DialogButton,
-  Menu,
-  MenuItem,
   PanelSection,
   PanelSectionRow,
-  Router,
+  Patch,
   ServerAPI,
-  showContextMenu,
   staticClasses,
 } from "decky-frontend-lib";
 import { VFC } from "react";
-import { FaShip } from "react-icons/fa";
+import { IoRibbonSharp } from "react-icons/io5";
 
-import logo from "../assets/logo.png";
+import { PyInterop } from "./lib/controllers/PyInterop";
+import { PluginContextProvider, PluginState, usePluginState } from "./state/PluginState";
+import { PluginController } from "./lib/controllers/PluginController";
+import { getLibContextMenu, libContextMenuPatch } from "./patches/GameOptionsPatch";
 
-// interface AddMethodArgs {
-//   left: number;
-//   right: number;
-// }
+declare global {
+  var SteamClient: SteamClient;
+  var collectionStore: CollectionStore;
+  var appStore: AppStore;
+  var loginStore: LoginStore;
+}
 
-const Content: VFC<{ serverAPI: ServerAPI }> = ({}) => {
-  // const [result, setResult] = useState<number | undefined>();
-
-  // const onClick = async () => {
-  //   const result = await serverAPI.callPluginMethod<AddMethodArgs, number>(
-  //     "add",
-  //     {
-  //       left: 2,
-  //       right: 2,
-  //     }
-  //   );
-  //   if (result.success) {
-  //     setResult(result.result);
-  //   }
-  // };
+const Content: VFC<{ serverAPI: ServerAPI }> = ({ }) => {
+  // const { currentGame, currentGameId, setCurrentGame } = usePluginState();
 
   return (
     <PanelSection title="Panel Section">
       <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={(e) =>
-            showContextMenu(
-              <Menu label="Menu" cancelText="CAAAANCEL" onCancel={() => {}}>
-                <MenuItem onSelected={() => {}}>Item #1</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #2</MenuItem>
-                <MenuItem onSelected={() => {}}>Item #3</MenuItem>
-              </Menu>,
-              e.currentTarget ?? window
-            )
-          }
-        >
-          Server says yolo
-        </ButtonItem>
-      </PanelSectionRow>
-
-      <PanelSectionRow>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <img src={logo} />
-        </div>
-      </PanelSectionRow>
-
-      <PanelSectionRow>
-        <ButtonItem
-          layout="below"
-          onClick={() => {
-            Router.CloseSideMenus();
-            Router.Navigate("/decky-plugin-test");
-          }}
-        >
-          Router
-        </ButtonItem>
+        <div>Open a game's options menu to edit achievements!</div>
       </PanelSectionRow>
     </PanelSection>
   );
 };
 
-const DeckyPluginRouterTest: VFC = () => {
-  return (
-    <div style={{ marginTop: "50px", color: "white" }}>
-      Hello World!
-      <DialogButton onClick={() => Router.NavigateToLibraryTab()}>
-        Go to Library
-      </DialogButton>
-    </div>
-  );
-};
-
 export default definePlugin((serverApi: ServerAPI) => {
-  serverApi.routerHook.addRoute("/decky-plugin-test", DeckyPluginRouterTest, {
-    exact: true,
+  PyInterop.setServer(serverApi);
+
+  const state = new PluginState();
+  PluginController.setup(serverApi, state);
+
+  const loginHook = PluginController.initOnLogin();
+
+  let patchedMenu: Patch | undefined;
+  getLibContextMenu().then((LibraryContextMenu) => {
+    patchedMenu = libContextMenuPatch(LibraryContextMenu);
   });
 
   return {
-    title: <div className={staticClasses.Title}>Example Plugin</div>,
-    content: <Content serverAPI={serverApi} />,
-    icon: <FaShip />,
+    title: <div className={staticClasses.Title}>Decky SAM</div>,
+    content: (
+      <PluginContextProvider PluginStateClass={state}>
+        <Content serverAPI={serverApi} />
+      </PluginContextProvider>
+    ),
+    icon: <IoRibbonSharp />,
     onDismount() {
-      serverApi.routerHook.removeRoute("/decky-plugin-test");
+      loginHook.unregister();
+      patchedMenu?.unpatch();
+      // serverApi.routerHook.removeRoute("/decky-sam-editor");
+      PluginController.dismount();
     },
+    alwaysRender: true
   };
 });

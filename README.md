@@ -9,7 +9,7 @@ Inspired by [Steam Achievement Manager](https://github.com/gibbed/SteamAchieveme
 2. Use the built in plugin store to download the Bash Shortcuts Plugin
 
 # Licensing
- - This program is licensed under the GNU General Public License Version 3
+ - This program is licensed under the BSD-3 Clause License
  - Usage of any code from this project should be credited appropriately
 
 Copyright Travis Lane (Tormak)

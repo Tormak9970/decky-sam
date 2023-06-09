@@ -1,9 +1,13 @@
 import { ServerAPI } from "decky-frontend-lib";
 import { PyInterop } from "./PyInterop";
 import { SteamController } from "./SteamController";
-import { History, debounce } from "../Utils";
 import { PluginState } from "../../state/PluginState";
 
+export type ChangedAchievement = {
+  achievement: SteamAchievement,
+  isUnlocked: boolean,
+  wasUnlocked: boolean
+}
 /**
  * Main controller class for the plugin.
  */
@@ -51,12 +55,31 @@ export class PluginController {
   static async init(): Promise<void> {
     PyInterop.log("PluginController initialized.");
   }
+
+  /**
+   * Gets the overview for the provided app.
+   * @param appid The id of the app to get the overview of.
+   * @returns A promise resolving to the app's overview, or null if failed.
+   */
+  static async getAppOverview(appid: number): Promise<SteamAppOverview | null> {
+    return await PluginController.steamController.getAppOverview(appid);
+  }
+
+  /**
+   * Gets the achievements for the provided app.
+   * @param appid The id of the app to get achievements for.
+   * @returns A promise resolving to the list of achievements.
+   */
+  static async getAchievementsForApp(appid: number): Promise<SteamAchievement[]> {
+    return await PluginController.steamController.getAllAchievementsForApp(appid);
+  }
   
   /**
    * Saves the changes made to the achievements of a game
    * @param achievementChanges An array of changes made to the achievements of a game.
+   * @returns A promise resolving to a boolean indicating if the changes were saved successfully.
    */
-  static async commitAchievementChanges(achievementChanges: any[]): Promise<boolean> {
+  static async commitAchievementChanges(achievementChanges: ChangedAchievement[]): Promise<boolean> {
     return false;
   }
 

@@ -1,7 +1,5 @@
-import { sleep } from "decky-frontend-lib";
 import { PyInterop } from "./PyInterop";
 import { waitForCondition } from "../Utils";
-
 /**
  * Wrapper class for the SteamClient interface.
  */
@@ -61,82 +59,14 @@ export class SteamController {
   }
 
   /**
-   * Gets the gameId associated with an app.
-   * @param appId The id of the game.
-   * @returns A promise resolving to the gameId.
+   * Gets the achievements for a game.
+   * @param appid The id of the app to get achievements for.
+   * @returns A promise resolving to the list of achievements.
    */
-  async getGameId(appId: number): Promise<string | null> {
-    const overview = await this.getAppOverview(appId);
-    if (!overview) {
-      PyInterop.log(`Could not get game id. [DEBUG INFO] appId: ${appId};`);
-      return null;
-    }
-
-    return overview.gameid;
-  }
-
-  /**
-   * Registers for lifecycle updates for a steam app.
-   * @param appId The id of the app to register for.
-   * @param callback The callback to run when an update is recieved.
-   * @returns A function to call to unregister the hook.
-   */
-  registerForAppLifetimeNotifications(appId: number, callback: (data: LifetimeNotification) => void): Unregisterer {
-    return SteamClient.GameSessions.RegisterForAppLifetimeNotifications((data: LifetimeNotification) => {
-      console.log("Lifecycle id:", data.unAppID, appId);
-      if (data.unAppID !== appId) return;
-
-      callback(data);
-    });
-  }
-
-  /**
-   * Registers for all lifecycle updates for steam apps.
-   * @param callback The callback to run when an update is recieved.
-   * @returns A function to call to unregister the hook.
-   */
-  registerForAllAppLifetimeNotifications(callback: (appId: number, data: LifetimeNotification) => void): Unregisterer {
-    return SteamClient.GameSessions.RegisterForAppLifetimeNotifications((data: LifetimeNotification) => {
-      callback(data.unAppID, data);
-    });
-  }
-
-  /**
-   * Waits for a game lifetime event to occur.
-   * @param appId The id of the app to wait for.
-   * @param options The options to determine when the function returns true.
-   * @returns A promise resolving to true when the desired lifetime event occurs.
-   */
-  async waitForAppLifetimeNotifications(appId: number, options: { initialTimeout?: number, waitForStart?: boolean, waitUntilNewEnd?: boolean } = {}): Promise<boolean> {
-    return new Promise<boolean>((resolve) => {
-      let timeoutId: any = null;
-      const { unregister } = this.registerForAppLifetimeNotifications(appId, (data: LifetimeNotification) => {
-        if (options.waitForStart && !data.bRunning) {
-          return;
-        }
-
-        if (timeoutId !== null) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
-
-        if (options.waitUntilNewEnd && data.bRunning) {
-          return;
-        }
-
-        unregister();
-        PyInterop.log(`Game lifetime subscription ended, game closed. [DEBUG INFO] appId: ${appId};`);
-        resolve(true);
-      });
-
-      if (options.initialTimeout) {
-        timeoutId = setTimeout(() => {
-          PyInterop.log(`Game lifetime subscription expired. [DEBUG INFO] appId: ${appId};`);
-          unregister();
-          resolve(false);
-        }, options.initialTimeout);
-      }
-    });
+  async getAllAchievementsForApp(appid: number): Promise<SteamAchievement[]> {
+    const achievements = await appDetailsStore.GetAchievements(appid);
+    console.log("Details Store Achievements", achievements);
+    return achievements;
   }
 
   /**
@@ -198,39 +128,6 @@ export class SteamController {
   registerForGameAchievementNotification(callback: (data: AchievementNotification) => void): Unregisterer {
     return SteamClient.GameSessions.RegisterForAchievementNotification((data: AchievementNotification) => {
       callback(data);
-    });
-  }
-
-  /**
-   * Registers a callback for screenshot notification events.
-   * @param callback The callback to run.
-   * @returns An Unregisterer for this hook.
-   */
-  registerForScreenshotNotification(callback: (data: ScreenshotNotification) => void): Unregisterer {
-    return SteamClient.GameSessions.RegisterForScreenshotNotification((data: ScreenshotNotification) => {
-      callback(data);
-    });
-  }
-
-  /**
-   * Registers a callback for deck sleep requested events.
-   * @param callback The callback to run.
-   * @returns An Unregisterer for this hook.
-   */
-  registerForSleepStart(callback: () => void): Unregisterer {
-    return SteamClient.User.RegisterForPrepareForSystemSuspendProgress(() => {
-      callback();
-    });
-  }
-
-  /**
-   * Registers a callback for deck shutdown requested events.
-   * @param callback The callback to run.
-   * @returns An Unregisterer for this hook.
-   */
-  registerForShutdownStart(callback: () => void): Unregisterer {
-    return SteamClient.User.RegisterForShutdownStart(() => {
-      callback();
     });
   }
 

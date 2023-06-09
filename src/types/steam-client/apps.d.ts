@@ -10,6 +10,7 @@ type Apps = {
   SetShortcutStartDir: (appId: number, startDir: string) => void,
   SetShortcutExe: (appId: number, exePath: string) => void,
   AddShortcut: (appName: string, exePath: string) => number,
+  GetMyAchievementsForApp: (appid: string) => Promise<SteamAchievement[]>,
 
   RegisterForGameActionEnd: (callback: (unk1: number) => void) => Unregisterer,
   RegisterForGameActionStart: (callback: (unk1: number, appId: string, action: string) => void) => Unregisterer,

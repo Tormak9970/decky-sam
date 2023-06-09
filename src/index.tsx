@@ -18,6 +18,7 @@ declare global {
   var SteamClient: SteamClient;
   var collectionStore: CollectionStore;
   var appStore: AppStore;
+  var appDetailsStore: AppDetailsStore;
   var loginStore: LoginStore;
 }
 
@@ -25,7 +26,7 @@ const Content: VFC<{ serverAPI: ServerAPI }> = ({ }) => {
   // const { currentGame, currentGameId, setCurrentGame } = usePluginState();
 
   return (
-    <PanelSection title="Panel Section">
+    <PanelSection title="Usage">
       <PanelSectionRow>
         <div>Open a game's options menu to edit achievements!</div>
       </PanelSectionRow>
@@ -49,7 +50,7 @@ export default definePlugin((serverApi: ServerAPI) => {
   return {
     title: <div className={staticClasses.Title}>Decky SAM</div>,
     content: (
-      <PluginContextProvider PluginStateClass={state}>
+      <PluginContextProvider pluginStateClass={state}>
         <Content serverAPI={serverApi} />
       </PluginContextProvider>
     ),

@@ -40,33 +40,33 @@ const PluginContext = createContext<PublicPluginContext>(null as any);
 export const usePluginState = () => useContext(PluginContext);
 
 interface ProviderProps {
-  PluginStateClass: PluginState
+  pluginStateClass: PluginState
 }
 
 export const PluginContextProvider: FC<ProviderProps> = ({
   children,
-  PluginStateClass
+  pluginStateClass
 }) => {
   const [publicState, setPublicState] = useState<PublicPluginState>({
-    ...PluginStateClass.getPublicState()
+    ...pluginStateClass.getPublicState()
   });
 
   useEffect(() => {
     function onUpdate() {
-      setPublicState({ ...PluginStateClass.getPublicState() });
+      setPublicState({ ...pluginStateClass.getPublicState() });
     }
 
-    PluginStateClass.eventBus
+    pluginStateClass.eventBus
       .addEventListener("stateUpdate", onUpdate);
 
     return () => {
-      PluginStateClass.eventBus
+      pluginStateClass.eventBus
         .removeEventListener("stateUpdate", onUpdate);
     }
   }, []);
 
   const setCurrentGame = (overview: SteamAppOverview | null) => {
-    PluginStateClass.setCurrentGame(overview);
+    pluginStateClass.setCurrentGame(overview);
   }
 
   return (

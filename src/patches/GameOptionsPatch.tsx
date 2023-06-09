@@ -18,7 +18,7 @@ export function insertAchievementEditor(children: any[], appid: number) {
     <MenuItem
       key="decky-sam-edit"
       onSelected={() => {
-        Navigation.Navigate(`/steamgriddb/${appid}`);
+        // TODO: show modal or navigate to route here
       }}
     >
       Edit Achievements

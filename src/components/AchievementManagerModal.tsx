@@ -2,6 +2,7 @@ import { ButtonItem, Focusable, ModalRoot, PanelSectionRow } from "decky-fronten
 import { useState, Fragment, useEffect } from "react";
 import { PluginController } from "../lib/controllers/PluginController";
 import { AchievementList } from "./AchievementList";
+import { PyInterop } from "../lib/controllers/PyInterop";
 
 type ChangedAchievement = {
   achievement: SteamAchievement,
@@ -16,13 +17,7 @@ export function AllThemesModalRoot({ gameAppId, closeModal }: { gameAppId: numbe
   );
 }
 
-export function AchievementManagerModal({
-  gameAppId,
-  closeModal,
-}: {
-  gameAppId: number,
-  closeModal: any
-}) {
+export function AchievementManagerModal({ gameAppId, closeModal }: { gameAppId: number, closeModal: any }) {
   let currentGame: any = null;
 
   const [achievements, setAchievements] = useState<ChangedAchievement[]>([]);
@@ -59,11 +54,11 @@ export function AchievementManagerModal({
     const success = await PluginController.commitAchievementChanges(gameAppId, appAchievements);
 
     if (success) {
-      // TODO: log
-      // TODO: show toast
+      PyInterop.log("Saved changes to achievements.");
+      PyInterop.toast("Decky SAM", "Saved achievement changes.");
     } else {
-      // TODO: log
-      // TODO: show toast
+      PyInterop.log("Failed to save changes to achievements.");
+      PyInterop.toast("Decky SAM", "Failed to save achievement changes.");
     }
   }
 

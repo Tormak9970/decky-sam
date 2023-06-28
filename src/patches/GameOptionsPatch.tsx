@@ -34,7 +34,7 @@ export function libContextMenuPatch(LibraryContextMenu: any) {
     const appid: number = component._owner.pendingProps.overview.appid;
 
     afterPatch(component.type.prototype, 'shouldComponentUpdate', ([nextProps]: any, shouldUpdate: any) => {
-      if (shouldUpdate === true && !nextProps.children.find((x: any) => x?.key === 'sgdb-change-artwork')) {
+      if (shouldUpdate === true && !nextProps.children.find((x: any) => x?.key === 'decky-sam-edit')) {
         let updatedAppid: number = appid;
         // find the first menu component that has the correct appid assigned to _owner
         const parentOverview = nextProps.children.find((x: any) => x?._owner?.pendingProps?.overview?.appid &&

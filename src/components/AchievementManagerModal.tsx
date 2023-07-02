@@ -9,7 +9,7 @@ type ChangedAchievement = {
   isUnlocked: boolean
 }
 
-export function AllThemesModalRoot({ gameAppId, closeModal }: { gameAppId: number, closeModal: any }) {
+export function AchievementsModalRoot({ gameAppId, closeModal }: { gameAppId: number, closeModal: any }) {
   return (
     <ModalRoot onCancel={closeModal} onEscKeypress={closeModal} bAllowFullSize >
       <AchievementManagerModal gameAppId={gameAppId} closeModal={closeModal} />

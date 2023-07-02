@@ -7,7 +7,7 @@ import {
   showModal,
 } from 'decky-frontend-lib';
 import { PyInterop } from "../lib/controllers/PyInterop";
-import { AchievementManagerModal } from "../components/AchievementManagerModal";
+import { AchievementsModalRoot } from "../components/AchievementManagerModal";
 
 // Always add before "Properties...". Maintains compatibility with decky-sgdb.
 export function insertAchievementEditor(children: any[], appid: number) {
@@ -20,7 +20,7 @@ export function insertAchievementEditor(children: any[], appid: number) {
       key="decky-sam-edit"
       onSelected={() => {
         // @ts-ignore
-        showModal(<AchievementManagerModal gameAppId={appid} />);
+        showModal(<AchievementsModalRoot gameAppId={appid} />);
       }}
     >
       Edit Achievements

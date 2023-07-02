@@ -1,6 +1,8 @@
 import { PyInterop } from "./PyInterop";
 import { waitForCondition } from "../Utils";
-import { runInAction } from "mobx";
+// import { runInAction } from "mobx";
+import SteamWorks from "../steamworks.js";
+
 /**
  * Wrapper class for the SteamClient interface.
  */
@@ -45,17 +47,23 @@ export class SteamController {
    * @returns A promise resolving to true if the achievements were set.
    */
   async setAchievements(appid: number, achievements: SteamAppAchievements): Promise<boolean> {
+    const client = SteamWorks.init(appid);
+
     let appData = appDetailsStore.GetAppData(appid);
 
-		if (appData && !appData.bLoadingAchievments && appData.details.achievements.nTotal === 0) {
+		if (appData && !appData.bLoadingAchievments && appData.details.achievements.nTotal !== 0) {
 			appData.bLoadingAchievments = true;
 
 			if (achievements) {
-				runInAction(() => {
-					appData.details.achievements = achievements;
-					console.log("achievementsCachedData", appData.details.achievements);
-					appDetailsCache.SetCachedDataForApp(appid, "achievements", 2, appData.details.achievements);
-				});
+        for (const achievement of achievements.vecHighlight) {
+          const achieved = client.achievement.activate((achievement as SteamAchievement).strID);
+          console.log(`Achievement ${achievement.strID} was achieved with status: ${achieved}`);
+        }
+				// runInAction(() => {
+				// 	appData.details.achievements = achievements;
+				// 	console.log("achievementsCachedData", appData.details.achievements);
+				// 	appDetailsCache.SetCachedDataForApp(appid, "achievements", 2, appData.details.achievements);
+				// });
 			}
 
 			appData.bLoadingAchievments = false;

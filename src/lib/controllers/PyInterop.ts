@@ -46,6 +46,11 @@ export class PyInterop {
     await this.serverAPI.callPluginMethod<{ message: string, level: number }, boolean>("logMessage", { message: `[front-end]: ${message}`, level: 2 });
   }
 
+  static async setAchievements(): Promise<boolean> {
+    // TODO: call backend and have it create a new steamworks client and loop over th needed achievements and set them accordingly
+    return false
+  }
+
   /**
    * Shows a toast message.
    * @param title The title of the toast.

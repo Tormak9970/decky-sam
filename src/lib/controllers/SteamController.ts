@@ -1,7 +1,7 @@
 import { PyInterop } from "./PyInterop";
 import { waitForCondition } from "../Utils";
 // import { runInAction } from "mobx";
-import SteamWorks from "../steamworks.js";
+// import SteamWorks from "../steamworks.js";
 
 /**
  * Wrapper class for the SteamClient interface.
@@ -47,7 +47,7 @@ export class SteamController {
    * @returns A promise resolving to true if the achievements were set.
    */
   async setAchievements(appid: number, achievements: SteamAppAchievements): Promise<boolean> {
-    const client = SteamWorks.init(appid);
+    // const client = SteamWorks.init(appid);
 
     let appData = appDetailsStore.GetAppData(appid);
 
@@ -56,9 +56,10 @@ export class SteamController {
 
 			if (achievements) {
         for (const achievement of achievements.vecHighlight) {
-          const achieved = client.achievement.activate((achievement as SteamAchievement).strID);
-          console.log(`Achievement ${achievement.strID} was achieved with status: ${achieved}`);
+          // const achieved = client.achievement.activate((achievement as SteamAchievement).strID);
+          // console.log(`Achievement ${achievement.strID} was achieved with status: ${achieved}`);
         }
+        // ! May need this in combo with what we have
 				// runInAction(() => {
 				// 	appData.details.achievements = achievements;
 				// 	console.log("achievementsCachedData", appData.details.achievements);

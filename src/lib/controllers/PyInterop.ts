@@ -46,7 +46,7 @@ export class PyInterop {
     await this.serverAPI.callPluginMethod<{ message: string, level: number }, boolean>("logMessage", { message: `[front-end]: ${message}`, level: 2 });
   }
 
-  static async setAchievements(): Promise<boolean> {
+  static async setAchievements(appid: number, achievements): Promise<boolean> {
     // TODO: call backend and have it create a new steamworks client and loop over th needed achievements and set them accordingly
     return false
   }

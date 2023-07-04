@@ -40,14 +40,14 @@ class STEAMWORKS(object):
         Primary STEAMWORKS class used for fundamental handling of the STEAMWORKS API
     """
     _arch = steamworks_util.get_arch()
-    _native_supported_platforms = ['linux', 'linux2', 'darwin', 'win32']
+    _native_supported_platforms = ['linux', 'linux2', 'win32']
 
-    def __init__(self, supported_platforms: list = []) -> None:
-        self._supported_platforms = supported_platforms
+    def __init__(self, app_id: int) -> None:
+        self._supported_platforms = ['linux', 'linux2', 'win32']
         self._loaded 	= False
         self._cdll 		= None
 
-        self.app_id 	= 0
+        self.app_id 	= app_id
 
         self._initialize()
 
@@ -74,11 +74,9 @@ class STEAMWORKS(object):
             else:
                 raise MissingSteamworksLibraryException(f'Missing library "libsteam_api.so"')
 
-        elif platform == 'darwin':
-            library_file_name = 'SteamworksPy.dylib'
-
-        elif platform == 'win32':
-            library_file_name = 'SteamworksPy.dll' if STEAMWORKS._arch == Arch.x86 else 'SteamworksPy64.dll'
+        # ? maybe support windows eventually
+        # elif platform == 'win32':
+        #     library_file_name = 'SteamworksPy.dll' if STEAMWORKS._arch == Arch.x86 else 'SteamworksPy64.dll'
 
         else:
             # This case is theoretically unreachable
@@ -90,13 +88,6 @@ class STEAMWORKS(object):
             library_path = os.path.join(os.path.dirname(__file__), library_file_name)
         else:
             raise MissingSteamworksLibraryException(f'Missing library {library_file_name}')
-
-        app_id_file = os.path.join(os.getcwd(), 'steam_appid.txt')
-        if not os.path.isfile(app_id_file):
-            raise FileNotFoundError(f'steam_appid.txt missing from {os.getcwd()}')
-
-        with open(app_id_file, 'r') as f:
-            self.app_id	= int(f.read())
 
         self._cdll 		= CDLL(library_path) # Throw native exception in case of error
         self._loaded 	= True
